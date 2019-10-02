@@ -1,0 +1,17 @@
+{
+    "name": "fakestream",
+    "version": "1.0.0",
+    "description": "",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node ./source/server.js"
+    },
+    "keywords": [],
+    "author": "Mebyus",
+    "devDependencies": {
+        "ws": "^7.1.2"
+    },
+    "dependencies": {
+        "@types/node": "^12.7.9"
+    }
+}
