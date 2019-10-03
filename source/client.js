@@ -1,4 +1,4 @@
-const url = 'ws://localhost:8080';
+const url = 'ws://localhost:9030';
 
 console.log('Started FSS Testing Client vesrion 0.0.1');
 
@@ -9,6 +9,6 @@ ws.onmessage = (event) => {
     messagesReceived += 1;
     console.log('A new message has been received');
     console.log('Session message count:', messagesReceived);
-    console.log('Message data:', event.data);
-    console.log();
+    console.log('Message data:', JSON.parse(event.data));
+    console.log('\n');
 }
