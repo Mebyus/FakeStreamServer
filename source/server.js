@@ -1,7 +1,9 @@
 const ws = require('ws');
 
-const port = 9030;
+let port = 9030;
 let delay = 3000;
+let manual = true;
+
 let skipProbability = 0.5;
 let minWorkgroups = 2;
 let maxWorkgroups = 5;
@@ -255,6 +257,18 @@ const wss = new ws.Server({
     }
 });
 
+// function waitForInput(query) {
+//     const rl = readline.createInterface({
+//         input: process.stdin,
+//         output: process.stdout,
+//     });
+
+//     return new Promise(resolve => rl.question(query, ans => {
+//         rl.close();
+//         resolve(ans);
+//     }))
+// }
+
 console.log('Started FSS version 0.9.2');
 console.log('Port:', port);
 console.log('Message delay:', delay);
@@ -262,7 +276,7 @@ console.log('Skip probability:', p);
 console.log('Average message rate:', desiredMessageRate);
 console.log();
 
-wss.on('connection', function connection(socket) {
+let operateAutomatically = (socket) => {
     console.log('Connection established\n');
 
     let messagesSent = 0;
@@ -281,4 +295,60 @@ wss.on('connection', function connection(socket) {
             messagesSkipped += 1;
         }
     }, delay);
-});
+};
+
+let operateManually = (socket) => {
+    console.log('Connection established\n');
+    console.log('You are in the manual mode');
+    console.log('Press:');
+    console.log('       (1) "s" to send a message');
+    console.log('       (2) "q" to close the server');
+    console.log('       (3) "ctrl+c" also works');
+    console.log();
+
+    let messagesSent = 0;
+
+    // node.js get keypress
+    let stdin = process.stdin;
+
+    // without this, we would only get streams once enter is pressed
+    stdin.setRawMode(true);
+
+    // resume stdin in the parent process (node app won't quit all by itself
+    // unless an error or process.exit() happens)
+    stdin.resume();
+    // i don't want binary, do you?
+    stdin.setEncoding('utf8');
+
+
+    // on any data into stdin
+    stdin.on( 'data', function(key)
+    {
+        // ctrl-c ( end of text )
+        if (key === '\u0003') {
+            process.exit();
+        }
+
+        if (key.indexOf('q') === 0) {
+            console.log('End of server session');
+            process.exit();
+        }
+
+        // without rawmode, it returns EOL with the string
+        if (key.indexOf('s') === 0)
+        {
+            socket.send(JSON.stringify(fake.generateMessage()));
+            
+            messagesSent += 1;
+
+            console.log('Success. That was message number ' + messagesSent);
+            console.log('Press "s" to send next message');
+            console.log();
+        }
+    
+    });
+}
+
+let operate = manual ? operateManually : operateAutomatically;
+
+wss.on('connection', operate);
